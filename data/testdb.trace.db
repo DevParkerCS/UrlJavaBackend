@@ -188,3 +188,6 @@ create global temporary table HTE_url_mapping(rn_ integer not null, id bigint, l
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "select * from url_mapping\000d\000a[*]select * from user_info"; SQL statement:
 select * from url_mapping
 select * from user_info [42000-232]
+2025-03-13 14:43:52.178930-07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "delete [*]* from url_mapping"; expected "identifier"; SQL statement:
+delete * from url_mapping [42001-232]
