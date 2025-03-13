@@ -184,3 +184,7 @@ Caused by: org.h2.jdbc.JdbcSQLNonTransientConnectionException: The connection wa
 2025-03-11 22:37:55.112498-07:00 jdbc[135]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "HTE_URL_MAPPING" already exists; SQL statement:
 create global temporary table HTE_url_mapping(rn_ integer not null, id bigint, long_url varchar(255), short_url varchar(255), primary key (rn_)) TRANSACTIONAL [42101-232]
+2025-03-12 18:06:12.454209-07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "select * from url_mapping\000d\000a[*]select * from user_info"; SQL statement:
+select * from url_mapping
+select * from user_info [42000-232]

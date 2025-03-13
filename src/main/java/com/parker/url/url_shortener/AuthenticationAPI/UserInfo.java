@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotNull;
 @Table(indexes = {
     @Index(name = "idx_email", columnList = "email", unique = true)
 })
+// Create table for prviate user information
 public class UserInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
