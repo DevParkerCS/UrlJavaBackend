@@ -4,6 +4,8 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import com.parker.url.url_shortener.UrlShortenerApplication;
+import com.parker.url.url_shortener.UrlClicks.UrlClick;
+import com.parker.url.url_shortener.UrlClicks.UrlClickRepository;
 
 import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +19,12 @@ public class UrlEndpoints {
     private final UrlShortenerApplication urlShortenerApplication;
     @Autowired
     private URLMappingRepository urlMappingRepository;
+    @Autowired
+    private UrlClickRepository urlClickRepo;
 
     UrlEndpoints(UrlShortenerApplication urlShortenerApplication) {
         this.urlShortenerApplication = urlShortenerApplication;
+
     }
     
     @PostMapping("/shorten")
@@ -64,6 +69,12 @@ public class UrlEndpoints {
         Optional<URLMapping> map = urlMappingRepository.findByShortUrl(shortUrl);
         // Ensure the short url is a valid url
         if(map.isPresent()) {
+            URLMapping urlMap = map.get();
+            UrlClick newClick = new UrlClick();
+            newClick.setIpAddress("1.1.1.1");
+            newClick.setUrlMapping(urlMap);
+            System.out.println("HERE");
+            urlClickRepo.save(newClick);
             return ResponseEntity.ok(map.get().getLongUrl());
         }else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Short Url Not Found");
