@@ -1,6 +1,8 @@
 package com.parker.url.url_shortener.URLAPI;
 
+import java.net.URI;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.parker.url.url_shortener.UrlShortenerApplication;
@@ -29,7 +31,12 @@ public class UrlEndpoints {
     
     @PostMapping("/shorten")
     public ResponseEntity<Map<String, String>> postUrlShorten(@RequestBody Map<String, String> request) {
-        String longUrl = request.get("url");
+        String rawLongUrl = request.get("url");
+        String longUrl = normalizeUrl(rawLongUrl);
+
+        if(longUrl.equals("")) {
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
+        }
 
         if(!isUrlValid(longUrl)) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
@@ -87,9 +94,45 @@ public class UrlEndpoints {
     }
 
     private boolean isUrlValid(String url) {
-        String emailRegex = "^(https?:\\/\\/)?(www\\.)?[a-zA-Z0-9-]+\\.[a-zA-Z]{2,}(\\/.*)?$";
-        Pattern pattern = Pattern.compile(emailRegex);
+        String urlRegex = "^(https?:\\/\\/)?(www?\\.)?[a-zA-Z0-9-]+\\.[a-zA-Z]{2,}(\\/.*)?$";
+        Pattern pattern = Pattern.compile(urlRegex);
+
+        // Check if the URL contains multiple occurrences of "https?://"
+        if (url.split("https?://").length >= 2) {
+            return false;  
+        }
+    
+        // Check if the URL contains multiple occurrences of "www."
+        if (url.split("www\\.").length >= 2) {
+            return false; 
+        }
+    
 
         return pattern.matcher(url).matches();
     }
+    
+    public String normalizeUrl(String url) {
+        // Define the regex pattern
+        String regex = "^(https?://)?(www\\.)?([^/]+)(/.*)?$";
+        
+        // Create a Pattern object
+        Pattern pattern = Pattern.compile(regex);
+        
+        // Create a matcher to match the URL
+        Matcher matcher = pattern.matcher(url);
+        
+        // Check if the URL matches the regex
+        if (matcher.matches()) {
+            // Extract the domain and the path
+            String domain = matcher.group(3);  // Group 3 contains the domain
+            String path = matcher.group(4) != null ? matcher.group(4) : "";  // Group 4 contains the path (if any)
+            
+            // Return the normalized URL (domain + path)
+            return domain + path;
+        }
+        
+        // Return empty string if no match
+        return "";
+    }
 }
+
