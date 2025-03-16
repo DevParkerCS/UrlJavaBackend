@@ -72,7 +72,7 @@ public class UrlEndpoints {
 
     @GetMapping("/{shortId}")
     public ResponseEntity<String> getLongUrl(@PathVariable String shortId) {
-        String shortUrl = "localhost:3000/" + shortId;
+        String shortUrl = shortId;
         Optional<URLMapping> map = urlMappingRepository.findByShortUrl(shortUrl);
         // Ensure the short url is a valid url
         if(map.isPresent()) {
@@ -90,7 +90,7 @@ public class UrlEndpoints {
     
     
     private String generateShortUrl(String longUrl) {
-        return "localhost:3000/" + UUID.randomUUID().toString().substring(0, 8);
+        return UUID.randomUUID().toString().substring(0, 8);
     }
 
     private boolean isUrlValid(String url) {

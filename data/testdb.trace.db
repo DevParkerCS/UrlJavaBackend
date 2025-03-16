@@ -1,0 +1,8 @@
+2025-03-14 17:29:49.387337-07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "select * from url_mapping\000d\000adelete [*]from url_mapping"; SQL statement:
+select * from url_mapping
+delete from url_mapping [42000-232]
+2025-03-14 17:29:49.527621-07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "select * from url_mapping\000d\000adelete [*]from url_mapping"; SQL statement:
+select * from url_mapping
+delete from url_mapping [42000-232]
