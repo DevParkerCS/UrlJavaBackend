@@ -30,7 +30,7 @@ public class UrlEndpoints {
     }
     
     @PostMapping("/shorten")
-    public ResponseEntity<Map<String, String>> postUrlShorten(@RequestBody Map<String, String> request) {
+    public ResponseEntity<URLMapping> postUrlShorten(@RequestBody Map<String, String> request) {
         String rawLongUrl = request.get("url");
         String longUrl = normalizeUrl(rawLongUrl);
 
@@ -41,15 +41,10 @@ public class UrlEndpoints {
         if(!isUrlValid(longUrl)) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
         }
-
-        Map<String, String> response = new HashMap<>();
         Optional<URLMapping> map = urlMappingRepository.findByLongUrl(longUrl);
 
         // Check if the url has already been shortened
         if(map.isPresent()) {
-            // Add the already shortened url to the response
-            response.put("shortUrl", map.get().getShortUrl());
-            response.put("new", null);
         }else {
             String shortUrl;
             // Continue creating a short url until a unique one is made.  There are over 4 billion combinations so this is unlikely
@@ -63,11 +58,8 @@ public class UrlEndpoints {
             urlMapping.setLongUrl(longUrl);
             // Save new mapping to table
             urlMappingRepository.save(urlMapping);
-            // Add information for client response
-            response.put("shortUrl", shortUrl);
-            response.put("new", "true");
         }
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(map.get());
     }
 
     @GetMapping("/{shortId}")
@@ -80,7 +72,6 @@ public class UrlEndpoints {
             UrlClick newClick = new UrlClick();
             newClick.setIpAddress("1.1.1.1");
             newClick.setUrlMapping(urlMap);
-            System.out.println("HERE");
             urlClickRepo.save(newClick);
             return ResponseEntity.ok(map.get().getLongUrl());
         }else {
