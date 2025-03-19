@@ -31,4 +31,12 @@ public class UrlClicksEndpoints {
         List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startDay, endDay);
         return clicks;
     }
+
+    @GetMapping("/tracking/current/{shortUrl}")
+    public List<UrlClick> getCurrentClicks(@PathVariable String shortUrl) {
+        LocalDateTime endTime = LocalDateTime.now();
+        LocalDateTime startTime = endTime.minusHours(1);
+        List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startTime, endTime);
+        return clicks;
+    }
 }
