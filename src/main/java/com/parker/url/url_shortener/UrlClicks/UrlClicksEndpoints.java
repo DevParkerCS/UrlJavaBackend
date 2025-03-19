@@ -1,5 +1,10 @@
 package com.parker.url.url_shortener.UrlClicks;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +18,17 @@ public class UrlClicksEndpoints {
     UrlClickRepository urlClickRepo;
 
     @GetMapping("/tracking/{shortUrl}")
-    public List<UrlClick> getMethodName(@PathVariable String shortUrl) {
+    public List<UrlClick> getMonthlyClicks(@PathVariable String shortUrl) {
         List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrl(shortUrl);
         return clicks;
     }
     
+    @GetMapping("/tracking/hourly/{shortUrl}/{day}")
+    public List<UrlClick> getDayClicks(@PathVariable String shortUrl, @PathVariable String day) {
+        LocalDate parsedDate = LocalDate.parse(day, DateTimeFormatter.ISO_DATE_TIME);
+        LocalDateTime startDay = parsedDate.atStartOfDay();
+        LocalDateTime endDay = parsedDate.atTime(LocalTime.MAX);
+        List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startDay, endDay);
+        return clicks;
+    }
 }
