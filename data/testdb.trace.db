@@ -72,3 +72,12 @@ ALTER TABLE url_mapping DROP COLUMN shortUrlCode [42122-232]
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:840)
+2025-03-18 17:42:41.413144-07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "update url_mapping set total_clicks [*]0"; expected "., [, ="; SQL statement:
+update url_mapping set total_clicks 0 [42001-232]
+2025-03-18 17:42:49.133520-07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement "update url_mapping set total_clicks [*]0"; expected "., [, ="; SQL statement:
+update url_mapping set total_clicks 0 [42001-232]
+2025-03-18 17:44:36.210920-07:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Table "URL_MAPING" not found; SQL statement:
+select * from url_maping [42102-232]
