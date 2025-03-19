@@ -13,8 +13,7 @@ import jakarta.persistence.Table;
     @Index(name = "idx_short", columnList = "shortUrl"),
     @Index(name = "idx_long", columnList = "longUrl")
 })
-public class URLMapping {
-    
+public class URLMapping {    
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -24,6 +23,23 @@ public class URLMapping {
     
     private String longUrl;
 
+    private Long totalClicks;
+
+    public URLMapping() {
+        this.totalClicks = 0L;
+    }
+
+    public void addClick() {
+        this.totalClicks++;
+    }
+
+    public Long getTotalClicks() {
+        return this.totalClicks;
+    } 
+
+    public void setTotalClicks(Long clicks) {
+        this.totalClicks = clicks;
+    } 
 
     public Long getId() {
         return this.id;

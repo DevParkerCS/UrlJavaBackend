@@ -69,10 +69,12 @@ public class UrlEndpoints {
         // Ensure the short url is a valid url
         if(map.isPresent()) {
             URLMapping urlMap = map.get();
+            urlMap.addClick();
             UrlClick newClick = new UrlClick();
             newClick.setIpAddress("1.1.1.1");
             newClick.setUrlMapping(urlMap);
             urlClickRepo.save(newClick);
+            urlMappingRepository.save(urlMap);
             return ResponseEntity.ok(map.get().getLongUrl());
         }else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Short Url Not Found");
