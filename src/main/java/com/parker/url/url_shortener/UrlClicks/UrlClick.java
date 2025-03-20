@@ -23,6 +23,8 @@ public class UrlClick {
     private Instant clickedAt;
     private String ipAddress;
 
+    private String region;
+
     public UrlClick() {
         this.clickedAt = Instant.now();
     }
@@ -34,6 +36,14 @@ public class UrlClick {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getRegion() {
+        return this.region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public URLMapping getUrlMapping() {
