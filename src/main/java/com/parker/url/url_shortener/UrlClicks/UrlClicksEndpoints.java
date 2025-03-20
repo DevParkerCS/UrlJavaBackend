@@ -39,4 +39,17 @@ public class UrlClicksEndpoints {
         List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startTime, endTime);
         return clicks;
     }
+
+    @GetMapping("/tracking/daily/{shortUrl}/{startDay}/{endDay}")
+    public List<UrlClick> getDailyClicks(@PathVariable String shortUrl, @PathVariable String startDay, @PathVariable String endDay) {
+        // Parse ISO time into LocalDate object
+        LocalDate start = LocalDate.parse(startDay, DateTimeFormatter.ISO_DATE_TIME);
+        // Turn start date into DateTime object
+        LocalDateTime startTime = start.atStartOfDay();
+        LocalDate end = LocalDate.parse(endDay, DateTimeFormatter.ISO_DATE_TIME);
+        LocalDateTime endTime = end.atTime(LocalTime.MAX);
+        List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startTime, endTime);
+
+        return clicks;
+    }
 }
