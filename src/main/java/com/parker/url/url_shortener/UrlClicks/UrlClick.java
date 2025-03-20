@@ -1,6 +1,8 @@
 package com.parker.url.url_shortener.UrlClicks;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import com.parker.url.url_shortener.URLAPI.URLMapping;
 
@@ -18,11 +20,11 @@ public class UrlClick {
     @JoinColumn(name = "url_mapping_id", nullable = false)
     private URLMapping urlMapping;
 
-    private LocalDateTime clickedAt;
+    private Instant clickedAt;
     private String ipAddress;
 
     public UrlClick() {
-        this.clickedAt = LocalDateTime.now();
+        this.clickedAt = Instant.now();
     }
 
     // Getters and Setters
@@ -42,11 +44,11 @@ public class UrlClick {
         this.urlMapping = urlMapping;
     }
 
-    public LocalDateTime getClickedAt() {
+    public Instant getClickedAt() {
         return this.clickedAt;
     }
 
-    public void setClickedAt(LocalDateTime clickedAt) {
+    public void setClickedAt(Instant clickedAt) {
         this.clickedAt = clickedAt;
     }
 

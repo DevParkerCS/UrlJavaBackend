@@ -45,6 +45,7 @@ public class UrlEndpoints {
 
         // Check if the url has already been shortened
         if(map.isPresent()) {
+            return ResponseEntity.ok(map.get());
         }else {
             String shortUrl;
             // Continue creating a short url until a unique one is made.  There are over 4 billion combinations so this is unlikely
@@ -56,10 +57,11 @@ public class UrlEndpoints {
             URLMapping urlMapping = new URLMapping();
             urlMapping.setShortUrl(shortUrl);
             urlMapping.setLongUrl(longUrl);
+            urlMapping.setTotalClicks(0L);
             // Save new mapping to table
             urlMappingRepository.save(urlMapping);
+            return ResponseEntity.ok(urlMapping);
         }
-        return ResponseEntity.ok(map.get());
     }
 
     @GetMapping("/{shortId}")
@@ -73,6 +75,7 @@ public class UrlEndpoints {
             UrlClick newClick = new UrlClick();
             newClick.setIpAddress("1.1.1.1");
             newClick.setUrlMapping(urlMap);
+            urlMap.setTotalClicks(urlMap.getTotalClicks() + 1);
             urlClickRepo.save(newClick);
             urlMappingRepository.save(urlMap);
             return ResponseEntity.ok(map.get().getLongUrl());
