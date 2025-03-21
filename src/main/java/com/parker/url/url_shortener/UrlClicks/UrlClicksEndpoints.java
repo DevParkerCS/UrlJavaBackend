@@ -8,13 +8,10 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 public class UrlClicksEndpoints {
@@ -35,12 +32,18 @@ public class UrlClicksEndpoints {
     
     @GetMapping("/tracking/hourly/{shortUrl}/{day}")
     public List<UrlClick> getDayClicks(@PathVariable String shortUrl, @PathVariable String day, @RequestParam String timeZone) {
-        LocalDate parsedDate = LocalDate.parse(day, DateTimeFormatter.ISO_DATE_TIME);
+        Instant startTime = Instant.parse(day);
         ZoneId zone = ZoneId.of(timeZone);
-        Instant startDay = parsedDate.atStartOfDay(zone).toInstant();
-        LocalDateTime endTime = parsedDate.atTime(LocalTime.MAX);
-        Instant endDay = endTime.atZone(zone).toInstant();
-        List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startDay, endDay);
+        startTime = startTime.atZone(zone)
+                        .toLocalDate()
+                        .atStartOfDay(zone)
+                        .toInstant();
+        Instant endTime = startTime.atZone(zone)
+                        .toLocalDate()
+                        .atTime(LocalTime.MAX)
+                        .atZone(zone)
+                        .toInstant();
+        List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startTime, endTime);
         return clicks;
     }
 
