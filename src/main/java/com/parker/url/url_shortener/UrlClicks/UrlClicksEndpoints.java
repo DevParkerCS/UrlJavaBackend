@@ -29,23 +29,6 @@ public class UrlClicksEndpoints {
         List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startOfYear, endOfYear);
         return clicks;
     }
-    
-    @GetMapping("/tracking/hourly/{shortUrl}/{day}")
-    public List<UrlClick> getDayClicks(@PathVariable String shortUrl, @PathVariable String day, @RequestParam String timeZone) {
-        Instant startTime = Instant.parse(day);
-        ZoneId zone = ZoneId.of(timeZone);
-        startTime = startTime.atZone(zone)
-                        .toLocalDate()
-                        .atStartOfDay(zone)
-                        .toInstant();
-        Instant endTime = startTime.atZone(zone)
-                        .toLocalDate()
-                        .atTime(LocalTime.MAX)
-                        .atZone(zone)
-                        .toInstant();
-        List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startTime, endTime);
-        return clicks;
-    }
 
     @GetMapping("/tracking/current/{shortUrl}")
     public List<UrlClick> getCurrentClicks(@PathVariable String shortUrl, @RequestParam String timeZone) {
@@ -56,8 +39,8 @@ public class UrlClicksEndpoints {
         return clicks;
     }
 
-    @GetMapping("/tracking/daily/{shortUrl}/{startDay}/{endDay}")
-    public List<UrlClick> getDailyClicks(@PathVariable String shortUrl, @PathVariable String startDay, @PathVariable String endDay, @RequestParam String timeZone) {
+    @GetMapping("/tracking/range/{shortUrl}/{startDay}/{endDay}")
+    public List<UrlClick> getClicksInRange(@PathVariable String shortUrl, @PathVariable String startDay, @PathVariable String endDay, @RequestParam String timeZone) {
         Instant startTime = Instant.parse(startDay);
         Instant endTime = Instant.parse(endDay);
         ZoneId zone = ZoneId.of(timeZone);
@@ -72,20 +55,6 @@ public class UrlClicksEndpoints {
                     .toInstant();
         List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startTime, endTime);
 
-        return clicks;
-    }
-
-    @GetMapping("/tracking/weekly/{shortUrl}/{startDay}/{endDay}")
-    public List<UrlClick> getWeeklyClicks(@PathVariable String shortUrl, @PathVariable String startDay, @PathVariable String endDay, @RequestParam String timeZone) {
-        ZoneId zone = ZoneId.of(timeZone);
-        Instant startTime = Instant.parse(startDay);
-        Instant endTime = Instant.parse(endDay);
-
-        startTime = startTime.atZone(zone).toLocalDate().atStartOfDay(zone).toInstant();
-        endTime = endTime.atZone(zone).toLocalDate().atTime(LocalTime.MAX).atZone(zone).toInstant();
-
-        List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startTime, endTime);
-        
         return clicks;
     }
 }
