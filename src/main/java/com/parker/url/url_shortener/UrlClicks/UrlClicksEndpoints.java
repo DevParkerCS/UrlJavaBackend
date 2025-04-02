@@ -74,4 +74,18 @@ public class UrlClicksEndpoints {
 
         return clicks;
     }
+
+    @GetMapping("/tracking/weekly/{shortUrl}/{startDay}/{endDay}")
+    public List<UrlClick> getWeeklyClicks(@PathVariable String shortUrl, @PathVariable String startDay, @PathVariable String endDay, @RequestParam String timeZone) {
+        ZoneId zone = ZoneId.of(timeZone);
+        Instant startTime = Instant.parse(startDay);
+        Instant endTime = Instant.parse(endDay);
+
+        startTime = startTime.atZone(zone).toLocalDate().atStartOfDay(zone).toInstant();
+        endTime = endTime.atZone(zone).toLocalDate().atTime(LocalTime.MAX).atZone(zone).toInstant();
+
+        List<UrlClick> clicks = urlClickRepo.findByUrlMapping_ShortUrlAndClickedAtBetween(shortUrl, startTime, endTime);
+        
+        return clicks;
+    }
 }
