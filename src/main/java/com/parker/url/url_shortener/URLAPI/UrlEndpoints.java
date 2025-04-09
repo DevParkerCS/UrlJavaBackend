@@ -1,15 +1,10 @@
 package com.parker.url.url_shortener.URLAPI;
-
-import java.net.URI;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.parker.url.url_shortener.UrlShortenerApplication;
 import com.parker.url.url_shortener.UrlClicks.UrlClick;
 import com.parker.url.url_shortener.UrlClicks.UrlClickRepository;
 
-import org.apache.catalina.connector.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,17 +12,10 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class UrlEndpoints {
-
-    private final UrlShortenerApplication urlShortenerApplication;
     @Autowired
     private URLMappingRepository urlMappingRepository;
     @Autowired
     private UrlClickRepository urlClickRepo;
-
-    UrlEndpoints(UrlShortenerApplication urlShortenerApplication) {
-        this.urlShortenerApplication = urlShortenerApplication;
-
-    }
     
     @PostMapping("/shorten")
     public ResponseEntity<URLMapping> postUrlShorten(@RequestBody Map<String, String> request) {
@@ -45,6 +33,7 @@ public class UrlEndpoints {
 
         // Check if the url has already been shortened
         if(map.isPresent()) {
+            return ResponseEntity.ok(map.get());
         }else {
             String shortUrl;
             // Continue creating a short url until a unique one is made.  There are over 4 billion combinations so this is unlikely
@@ -56,23 +45,28 @@ public class UrlEndpoints {
             URLMapping urlMapping = new URLMapping();
             urlMapping.setShortUrl(shortUrl);
             urlMapping.setLongUrl(longUrl);
+            urlMapping.setTotalClicks(0L);
             // Save new mapping to table
             urlMappingRepository.save(urlMapping);
+            return ResponseEntity.ok(urlMapping);
         }
-        return ResponseEntity.ok(map.get());
     }
 
     @GetMapping("/{shortId}")
-    public ResponseEntity<String> getLongUrl(@PathVariable String shortId) {
+    public ResponseEntity<String> getLongUrl(@PathVariable String shortId, @RequestParam String timeZone) {
         String shortUrl = shortId;
         Optional<URLMapping> map = urlMappingRepository.findByShortUrl(shortUrl);
         // Ensure the short url is a valid url
         if(map.isPresent()) {
             URLMapping urlMap = map.get();
+            urlMap.addClick();
             UrlClick newClick = new UrlClick();
             newClick.setIpAddress("1.1.1.1");
             newClick.setUrlMapping(urlMap);
+            newClick.setRegion(timeZone.split("/")[0]);
+            urlMap.setTotalClicks(urlMap.getTotalClicks() + 1);
             urlClickRepo.save(newClick);
+            urlMappingRepository.save(urlMap);
             return ResponseEntity.ok(map.get().getLongUrl());
         }else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Short Url Not Found");
