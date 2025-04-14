@@ -19,27 +19,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-
-
 @RestController
 public class UserEndpoints {
     @Autowired
     private UserInfoRepository userRepo;
 
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> postMethodName(@RequestBody String email, @RequestBody String password, @RequestBody String firstName, 
-    @RequestBody String lastName, HttpServletResponse httpResponse) {
-        
+    public ResponseEntity<Map<String, String>> postMethodName(@RequestBody Map<String, String> signupInfo,
+            HttpServletResponse httpResponse) {
+
+        String username = signupInfo.get("username");
+        String password = signupInfo.get("password");
         // Ensure email and password match regex requirements
-        if(!isEmailValid(email) || !isPasswordValid(password)) {
+        if (!isPasswordValid(password)) {
             return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(null);
         }
 
         HashMap<String, String> response = new HashMap<>();
-        Optional<UserInfo> info = userRepo.findByEmail(email);
+        Optional<UserInfo> info = userRepo.findByUsername(username);
 
         // Check if user has already made an account under the email
-        if(info.isPresent()) {
+        if (info.isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
@@ -48,26 +48,32 @@ public class UserEndpoints {
 
         // Create new user for SQL table
         UserInfo userInfo = new UserInfo();
-        userInfo.setEmail(email);
-        userInfo.setFirstName(firstName);
-        userInfo.setLastName(lastName);
+        userInfo.setEmail("Test@gmail.com");
+        userInfo.setUsername(username);
+        // Adjust this as eventually first and last are optional
+        userInfo.setFirstName("First");
+        userInfo.setLastName("Last");
+
         String encodedPassword = encoder.encode(password);
         userInfo.setPassword(encodedPassword);
         // Save user into SQL table
         userRepo.save(userInfo);
-        
+
         return ResponseEntity.ok(response);
     }
-    
+
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> getMethodName(@RequestBody String email, @RequestBody String password, HttpServletResponse response) {
-        Optional<UserInfo> info = userRepo.findByEmail(email);
+    public ResponseEntity<Map<String, String>> getMethodName(@RequestBody Map<String, String> loginInfo,
+            HttpServletResponse response) {
+        String username = loginInfo.get("username");
+        String password = loginInfo.get("password");
+        Optional<UserInfo> info = userRepo.findByUsername(username);
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-        // Check that a user does indeed exist under the email
-        if(info.isPresent()) {
+        // Check that a user does indeed exist under the username
+        if (info.isPresent()) {
             // Check that the user has entered the correct password for the email
-            if(encoder.matches(password, info.get().getPassword())) {
+            if (encoder.matches(password, info.get().getPassword())) {
                 HashMap<String, String> userMap = new HashMap<>();
                 userMap.put("firstName", info.get().getFirstName());
                 userMap.put("lastName", info.get().getLastName());
@@ -76,7 +82,7 @@ public class UserEndpoints {
                 return ResponseEntity.ok(userMap);
             }
             return ResponseEntity.ok(null);
-        }else {
+        } else {
             return ResponseEntity.ok(null);
         }
     }
@@ -90,11 +96,11 @@ public class UserEndpoints {
         loginCookie.setSecure(false);
         loginCookie.setHttpOnly(true);
         loginCookie.setAttribute("SameSite", "Strict");
-        
+
         // Add cookie to the response
         response.addCookie(loginCookie);
     }
-    
+
     // Check that email matches regex pattern
     private boolean isEmailValid(String email) {
         String emailRegex = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";

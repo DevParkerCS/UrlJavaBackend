@@ -11,7 +11,7 @@ import jakarta.validation.constraints.NotNull;
 
 @Entity
 @Table(indexes = {
-    @Index(name = "idx_email", columnList = "email", unique = true)
+        @Index(name = "idx_email", columnList = "email", unique = true)
 })
 // Create table for prviate user information
 public class UserInfo {
@@ -22,14 +22,27 @@ public class UserInfo {
     @NotNull
     @Column(unique = true)
     private String email;
-    
+
+    @NotNull
+    @Column(unique = true)
+    private String username;
+
     @NotNull
     private String password;
 
-    @NotNull
+    @Column(nullable = true)
     private String firstName;
-    
+
+    @Column(nullable = true)
     private String lastName;
+
+    public String getUsername() {
+        return this.username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public Long getId() {
         return this.id;
