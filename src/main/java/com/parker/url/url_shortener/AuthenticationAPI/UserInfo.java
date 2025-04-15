@@ -21,10 +21,6 @@ public class UserInfo {
 
     @NotNull
     @Column(unique = true)
-    private String email;
-
-    @NotNull
-    @Column(unique = true)
     private String username;
 
     @NotNull
@@ -46,14 +42,6 @@ public class UserInfo {
 
     public Long getId() {
         return this.id;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPassword() {

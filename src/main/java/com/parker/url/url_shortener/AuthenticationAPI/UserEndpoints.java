@@ -5,10 +5,16 @@ import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.parker.url.url_shortener.UserSessions.UserSessions;
+import com.parker.url.url_shortener.UserSessions.UserSessionsRepository;
+import com.parker.url.url_shortener.Utils.CookieUtils;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -19,9 +25,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class UserEndpoints {
     @Autowired
     private UserInfoRepository userRepo;
+    @Autowired
+    UserSessionsRepository userSessionsRepo;
 
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> postMethodName(@RequestBody Map<String, String> signupInfo,
+    public ResponseEntity<Map<String, String>> postSignup(@RequestBody Map<String, String> signupInfo,
             HttpServletResponse httpResponse) {
 
         String username = signupInfo.get("username");
@@ -40,11 +48,9 @@ public class UserEndpoints {
         }
 
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        createLoginCookie(httpResponse);
 
         // Create new user for SQL table
         UserInfo userInfo = new UserInfo();
-        userInfo.setEmail("Test@gmail.com");
         userInfo.setUsername(username);
         // Adjust this as eventually first and last are optional
         userInfo.setFirstName("First");
@@ -54,13 +60,31 @@ public class UserEndpoints {
         userInfo.setPassword(encodedPassword);
         // Save user into SQL table
         userRepo.save(userInfo);
+        CookieUtils.createLoginCookie(httpResponse, userInfo, userSessionsRepo);
 
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, String>> getMethodName(@RequestBody Map<String, String> loginInfo,
-            HttpServletResponse response) {
+    public ResponseEntity<UserDTO> postLogin(@RequestBody Map<String, String> loginInfo,
+            HttpServletResponse response, HttpServletRequest request) {
+        
+        Cookie[] cookies = request.getCookies();
+
+        for(int i = 0; i < cookies.length; i++) {
+            if(cookies[i].getName().equals("session_id")) {
+                Optional<UserSessions> sessionMap = userSessionsRepo.findBySessionId(cookies[i].getValue());
+                if(sessionMap.isPresent()) {
+                    UserInfo user = sessionMap.get().getUser();
+                    CookieUtils.updateCookie(cookies[i], userSessionsRepo, sessionMap.get(), response);
+                    UserDTO userDTO = new UserDTO(user);
+                    return ResponseEntity.ok(userDTO);
+                }else {
+                    break;
+                }
+            }
+        }
+        
         String username = loginInfo.get("username");
         String password = loginInfo.get("password");
         Optional<UserInfo> info = userRepo.findByUsername(username);
@@ -70,12 +94,9 @@ public class UserEndpoints {
         if (info.isPresent()) {
             // Check that the user has entered the correct password for the email
             if (encoder.matches(password, info.get().getPassword())) {
-                HashMap<String, String> userMap = new HashMap<>();
-                userMap.put("firstName", info.get().getFirstName());
-                userMap.put("lastName", info.get().getLastName());
-                userMap.put("email", info.get().getEmail());
-                createLoginCookie(response);
-                return ResponseEntity.ok(userMap);
+                CookieUtils.createLoginCookie(response, info.get(), userSessionsRepo);
+                UserDTO userDTO = new UserDTO(info.get());
+                return ResponseEntity.ok(userDTO);
             }
             return ResponseEntity.ok(null);
         } else {
@@ -83,18 +104,9 @@ public class UserEndpoints {
         }
     }
 
-    private void createLoginCookie(HttpServletResponse response) {
-        // Create new login cookie with unique session id
-        Cookie loginCookie = new Cookie("session_id", UUID.randomUUID().toString());
-
-        // Set cookie attributes
-        loginCookie.setMaxAge(3600);
-        loginCookie.setSecure(false);
-        loginCookie.setHttpOnly(true);
-        loginCookie.setAttribute("SameSite", "Strict");
-
-        // Add cookie to the response
-        response.addCookie(loginCookie);
+    @PostMapping("/logout")
+    public ResponseEntity<Boolean> postLogout(HttpServletRequest request) {
+        return ResponseEntity.ok(true);
     }
 
     // Check that email matches regex pattern
