@@ -70,17 +70,19 @@ public class UserEndpoints {
             HttpServletResponse response, HttpServletRequest request) {
         
         Cookie[] cookies = request.getCookies();
-
-        for(int i = 0; i < cookies.length; i++) {
-            if(cookies[i].getName().equals("session_id")) {
-                Optional<UserSessions> sessionMap = userSessionsRepo.findBySessionId(cookies[i].getValue());
-                if(sessionMap.isPresent()) {
-                    UserInfo user = sessionMap.get().getUser();
-                    CookieUtils.updateCookie(cookies[i], userSessionsRepo, sessionMap.get(), response);
-                    UserDTO userDTO = new UserDTO(user);
-                    return ResponseEntity.ok(userDTO);
-                }else {
-                    break;
+        
+        if(cookies != null) {
+            for(int i = 0; i < cookies.length; i++) {
+                if(cookies[i].getName().equals("session_id")) {
+                    Optional<UserSessions> sessionMap = userSessionsRepo.findBySessionId(cookies[i].getValue());
+                    if(sessionMap.isPresent()) {
+                        UserInfo user = sessionMap.get().getUser();
+                        CookieUtils.updateCookie(cookies[i], userSessionsRepo, sessionMap.get(), response);
+                        UserDTO userDTO = new UserDTO(user);
+                        return ResponseEntity.ok(userDTO);
+                    }else {
+                        break;
+                    }
                 }
             }
         }
@@ -102,6 +104,28 @@ public class UserEndpoints {
         } else {
             return ResponseEntity.ok(null);
         }
+    }
+
+    @PostMapping("/checkUserCookies")
+    public ResponseEntity<UserDTO> postUserCookieCheck(HttpServletRequest request, HttpServletResponse response) {
+        Cookie[] cookies = request.getCookies();
+        
+        if(cookies != null) {
+            for(int i = 0; i < cookies.length; i++) {
+                if(cookies[i].getName().equals("session_id")) {
+                    Optional<UserSessions> sessionMap = userSessionsRepo.findBySessionId(cookies[i].getValue());
+                    if(sessionMap.isPresent()) {
+                        UserInfo user = sessionMap.get().getUser();
+                        CookieUtils.updateCookie(cookies[i], userSessionsRepo, sessionMap.get(), response);
+                        UserDTO userDTO = new UserDTO(user);
+                        return ResponseEntity.ok(userDTO);
+                    }else {
+                        return ResponseEntity.ok(null);
+                    }
+                }
+            }
+        }
+        return ResponseEntity.ok(null);
     }
 
     @PostMapping("/logout")

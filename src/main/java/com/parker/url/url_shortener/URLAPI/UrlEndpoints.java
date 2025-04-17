@@ -66,7 +66,6 @@ public class UrlEndpoints {
             newClick.setIpAddress("1.1.1.1");
             newClick.setUrlMapping(urlMap);
             newClick.setRegion(timeZone.split("/")[0]);
-            urlMap.setTotalClicks(urlMap.getTotalClicks() + 1);
             urlClickRepo.save(newClick);
             urlMappingRepository.save(urlMap);
             return ResponseEntity.ok(map.get().getLongUrl());
